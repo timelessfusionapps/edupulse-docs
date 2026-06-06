@@ -1,0 +1,49 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Global function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function schoolId() {
+      return request.auth.token.schoolId;
+    }
+
+    function userRole() {
+      return request.auth.token.role;
+    }
+
+    function isSuperAdmin() { return userRole() == 'super_admin'; }
+
+    function isTenantUser(targetSchoolId) {
+      return isAuthenticated() && (schoolId() == targetSchoolId || isSuperAdmin());
+    }
+
+    // Size constraint: less than 5MB
+    function isValidSize() {
+      return request.resource.size < 5 * 1024 * 1024;
+    }
+
+    // Type constraint: images and pdfs only
+    function isValidContentType() {
+      return request.resource.contentType.matches('image/.*') || 
+             request.resource.contentType.matches('application/pdf');
+    }
+
+    // Tenant isolation mapping for storage
+    match /schools/{targetSchoolId}/{allPaths=**} {
+      allow read: if isTenantUser(targetSchoolId);
+      allow write: if isTenantUser(targetSchoolId)
+                   && isValidSize()
+                   && isValidContentType();
+      allow delete: if isTenantUser(targetSchoolId) && (userRole() == 'school_admin' || userRole() == 'principal' || isSuperAdmin());
+    }
+
+    // Default deny
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

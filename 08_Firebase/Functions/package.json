@@ -1,0 +1,35 @@
+{
+  "name": "functions",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "serve": "npm run build && firebase emulators:start --only functions",
+    "shell": "npm run build && firebase functions:shell",
+    "start": "npm run shell",
+    "deploy": "firebase deploy --only functions",
+    "logs": "firebase functions:log",
+    "test": "jest",
+    "dev:emulators": "npm run build && firebase emulators:start --import=./emulator_data --export-on-exit",
+    "seed:run": "npx tsx src/testing/seeds/runSeeds.ts",
+    "seed:reset": "firebase emulators:exec \"npm run seed:run\"",
+    "clean:emulators": "rm -rf emulator_data",
+    "validate:backend": "npx tsx src/testing/validate_backend.ts"
+  },
+  "engines": {
+    "node": "20"
+  },
+  "main": "lib/index.js",
+  "dependencies": {
+    "firebase-admin": "^12.1.0",
+    "firebase-functions": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "firebase-functions-test": "^3.1.0",
+    "jest": "^30.4.2",
+    "ts-jest": "^29.4.10",
+    "tsx": "^4.22.3",
+    "typescript": "^5.0.0"
+  },
+  "private": true
+}

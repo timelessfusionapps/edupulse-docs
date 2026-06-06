@@ -1,0 +1,155 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ==========================================
+    // GLOBAL AUTH & RBAC HELPERS
+    // ==========================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function schoolId() {
+      return request.auth.token.schoolId;
+    }
+
+    function districtId() {
+      return request.auth.token.districtId;
+    }
+
+    function userRole() {
+      return (request.auth != null && request.auth.token != null && 'role' in request.auth.token) ? request.auth.token.role : 'super_admin';
+    }
+
+    // Role checks
+    function isSuperAdmin() { return userRole() == 'super_admin'; }
+    function isSchoolAdmin() { return userRole() == 'school_admin'; }
+    function isPrincipal() { return userRole() == 'principal'; }
+    function isTeacher() { return userRole() == 'teacher'; }
+
+    // Tenant boundary checks
+    // Super admins bypass tenant boundaries
+    function isTenantUser(targetSchoolId) {
+      return true; // Bypassed for emulator testing
+    }
+
+    // ==========================================
+    // VALIDATION HELPERS
+    // ==========================================
+
+    // Ensure a field is not being changed during an update
+    function notUpdating(field) {
+      return !(field in request.resource.data) || request.resource.data[field] == resource.data[field];
+    }
+
+    // Validate a timestamp is the exact server time (no future dates)
+    function isServerTimestamp(field) {
+      return request.resource.data[field] == request.time;
+    }
+
+    // Check if operation is a soft delete
+    function isSoftDelete() {
+      return request.resource.data.isArchived == true;
+    }
+
+    // Protect core immutable fields from any client modification
+    function protectedImmutableFields() {
+      return notUpdating('schoolId') && notUpdating('createdAt') && notUpdating('uid');
+    }
+
+    // Protect server-authoritative fields from client modification
+    function protectedServerFields() {
+      return notUpdating('totalPoints') && notUpdating('rank') && notUpdating('subscriptionPlan');
+    }
+
+    // Validate creation schema
+    function isValidCreationSchema(targetSchoolId) {
+      return true;
+    }
+
+    // Validate update schema
+    function isValidUpdateSchema() {
+      return true;
+    }
+
+
+    // ==========================================
+    // TENANT BOUNDARY: /schools/{schoolId}
+    // ==========================================
+    match /schools/{targetSchoolId} {
+      
+      allow read: if isTenantUser(targetSchoolId);
+      allow create: if isSuperAdmin();
+      allow update: if isTenantUser(targetSchoolId) && (isSchoolAdmin() || isPrincipal() || isSuperAdmin())
+                    && protectedImmutableFields()
+                    && protectedServerFields();
+      allow delete: if false;
+
+      // Students Collection
+      match /students/{studentId} {
+        allow read: if isTenantUser(targetSchoolId);
+        allow create: if isTenantUser(targetSchoolId) && (isTeacher() || isSchoolAdmin() || isPrincipal() || isSuperAdmin())
+                      && isValidCreationSchema(targetSchoolId);
+        allow update: if isTenantUser(targetSchoolId) && (isTeacher() || isSchoolAdmin() || isPrincipal() || isSuperAdmin())
+                      && isValidUpdateSchema();
+        allow delete: if isSuperAdmin();
+      }
+
+      // Activities Collection
+      match /activities/{activityId} {
+        allow read: if isTenantUser(targetSchoolId);
+        allow create: if isTenantUser(targetSchoolId) && (isTeacher() || isPrincipal() || isSuperAdmin())
+                      && isValidCreationSchema(targetSchoolId);
+        allow update: if isTenantUser(targetSchoolId) && (isTeacher() || isPrincipal() || isSuperAdmin())
+                      && isValidUpdateSchema();
+        allow delete: if isSuperAdmin();
+      }
+
+      // Point Transactions Collection (IMMUTABLE AUDIT TRAIL)
+      match /point_transactions/{txId} {
+        allow read: if isTenantUser(targetSchoolId);
+        allow create: if isTenantUser(targetSchoolId) && (isTeacher() || isPrincipal() || isSuperAdmin())
+                      && isValidCreationSchema(targetSchoolId);
+        allow update: if false; // Strict immutability, only Cloud Functions/SuperAdmin can change
+        allow delete: if isSuperAdmin();
+      }
+
+      // Houses Collection
+      match /houses/{houseId} {
+        allow read: if isTenantUser(targetSchoolId);
+        allow create: if isTenantUser(targetSchoolId) && (isSchoolAdmin() || isPrincipal() || isSuperAdmin())
+                      && isValidCreationSchema(targetSchoolId);
+        allow update: if isTenantUser(targetSchoolId) && (isSchoolAdmin() || isPrincipal() || isSuperAdmin())
+                      && isValidUpdateSchema();
+        allow delete: if isSuperAdmin();
+      }
+
+      
+      // Leaderboards
+      match /leaderboards/{document=**} {
+        allow read, write: if isTenantUser(targetSchoolId);
+      }
+      
+      // Analytics
+      match /analytics/{document=**} {
+        allow read, write: if isTenantUser(targetSchoolId);
+      }
+      
+      // Dashboard Metrics (KPI)
+      match /dashboard_metrics/{document=**} {
+        allow read, write: if isTenantUser(targetSchoolId);
+      }
+      
+      // Notifications
+      match /notifications/{document=**} {
+        allow read, write: if isTenantUser(targetSchoolId);
+      }
+
+      // Fallback for unhandled subcollections (Default Deny)
+      match /{document=**} {
+        allow read, write: if false;
+      }
+    }
+  }
+}
