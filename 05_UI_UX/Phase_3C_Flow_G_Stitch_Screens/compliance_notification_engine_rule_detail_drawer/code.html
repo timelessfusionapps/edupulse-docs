@@ -1,0 +1,444 @@
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>EduSecure Global Control Center - Compliance Notification Engine</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-bright": "#f8f9ff",
+                    "on-primary": "#ffffff",
+                    "on-background": "#0d1c2d",
+                    "on-secondary-container": "#5c647a",
+                    "on-tertiary": "#ffffff",
+                    "tertiary": "#7e3000",
+                    "surface-container-highest": "#d4e4fa",
+                    "on-tertiary-fixed": "#351000",
+                    "on-secondary-fixed-variant": "#3f465c",
+                    "secondary-fixed-dim": "#bec6e0",
+                    "primary": "#3525cd",
+                    "surface-variant": "#d4e4fa",
+                    "on-tertiary-container": "#ffd2be",
+                    "surface-dim": "#ccdbf2",
+                    "inverse-surface": "#233143",
+                    "surface-container-lowest": "#ffffff",
+                    "on-primary-fixed-variant": "#3323cc",
+                    "background": "#f8f9ff",
+                    "on-primary-fixed": "#0f0069",
+                    "outline": "#777587",
+                    "error-container": "#ffdad6",
+                    "primary-fixed": "#e2dfff",
+                    "tertiary-fixed-dim": "#ffb695",
+                    "surface-tint": "#4d44e3",
+                    "on-secondary": "#ffffff",
+                    "on-error-container": "#93000a",
+                    "secondary-container": "#dae2fd",
+                    "on-error": "#ffffff",
+                    "on-tertiary-fixed-variant": "#7b2f00",
+                    "on-surface": "#0d1c2d",
+                    "on-primary-container": "#dad7ff",
+                    "surface-container-low": "#eef4ff",
+                    "error": "#ba1a1a",
+                    "surface": "#f8f9ff",
+                    "outline-variant": "#c7c4d8",
+                    "surface-container": "#e5efff",
+                    "on-surface-variant": "#464555",
+                    "tertiary-container": "#a44100",
+                    "inverse-primary": "#c3c0ff",
+                    "secondary": "#565e74",
+                    "on-secondary-fixed": "#131b2e",
+                    "tertiary-fixed": "#ffdbcc",
+                    "inverse-on-surface": "#e9f1ff",
+                    "secondary-fixed": "#dae2fd",
+                    "surface-container-high": "#dbe9ff",
+                    "primary-container": "#4f46e5",
+                    "primary-fixed-dim": "#c3c0ff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "12px",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "max_width": "1440px",
+                    "table_header_height": "52px",
+                    "table_row_height": "72px",
+                    "gutter": "24px",
+                    "sidebar_width": "280px",
+                    "grid_columns": "12",
+                    "drawer_width": "420px",
+                    "margin": "32px"
+            },
+            "fontFamily": {
+                    "page-title": ["Inter"],
+                    "label-sm": ["Inter"],
+                    "body-main": ["Inter"],
+                    "mono-data": ["Inter"],
+                    "table-cell": ["Inter"],
+                    "section-title": ["Inter"],
+                    "table-header": ["Inter"]
+            },
+            "fontSize": {
+                    "page-title": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                    "body-main": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "mono-data": ["13px", {"lineHeight": "18px", "letterSpacing": "-0.01em", "fontWeight": "400"}],
+                    "table-cell": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "section-title": ["20px", {"lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "table-header": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+      body {
+        background-color: #f8fafc;
+        color: #0d1c2d;
+        font-family: 'Inter', sans-serif;
+      }
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #e2e8f0;
+        border-radius: 10px;
+      }
+      .accent-card {
+        border-left: 4px solid #3525cd;
+      }
+      .accent-card-critical {
+        border-left: 4px solid #ba1a1a;
+      }
+      .accent-card-high {
+        border-left: 4px solid #7e3000;
+      }
+      .accent-card-medium {
+        border-left: 4px solid #565e74;
+      }
+    </style>
+</head><body class="overflow-hidden">
+<!-- Administrative Sidebar (SideNavBar Anchor) -->
+<aside class="w-[280px] h-screen fixed left-0 top-0 bg-[#0f172a] flex flex-col border-r border-outline-variant z-50">
+<div class="p-6">
+<h1 class="font-page-title text-page-title text-white leading-tight">EduSecure</h1>
+<p class="text-[#94a3b8] text-label-sm font-label-sm uppercase tracking-wider">Global Control Center</p>
+</div>
+<nav class="flex-1 px-4 space-y-1 overflow-y-auto custom-scrollbar">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-[#94a3b8] hover:text-white hover:bg-on-secondary-fixed-variant transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-body-main text-body-main">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-[#94a3b8] hover:text-white hover:bg-on-secondary-fixed-variant transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">school</span>
+<span class="font-body-main text-body-main">Schools</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-[#94a3b8] hover:text-white hover:bg-on-secondary-fixed-variant transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">assignment</span>
+<span class="font-body-main text-body-main">Applications</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-[#94a3b8] hover:text-white hover:bg-on-secondary-fixed-variant transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">science</span>
+<span class="font-body-main text-body-main">Trials</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-[#94a3b8] hover:text-white hover:bg-on-secondary-fixed-variant transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">admin_panel_settings</span>
+<span class="font-body-main text-body-main">Platform Admins</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-[#94a3b8] hover:text-white hover:bg-on-secondary-fixed-variant transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">security</span>
+<span class="font-body-main text-body-main">Audit Center</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-[#94a3b8] hover:text-white hover:bg-on-secondary-fixed-variant transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">settings_backup_restore</span>
+<span class="font-body-main text-body-main">Recovery Center</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 border-l-4 border-primary-container text-white bg-on-secondary-fixed-variant" href="#">
+<span class="material-symbols-outlined">mail</span>
+<span class="font-body-main text-body-main">Communications</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-[#94a3b8] hover:text-white hover:bg-on-secondary-fixed-variant transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-body-main text-body-main">Settings</span>
+</a>
+</nav>
+<div class="p-4 border-t border-slate-800">
+<div class="flex items-center gap-3 px-2">
+<div class="w-8 h-8 rounded bg-primary-container flex items-center justify-center text-white font-bold text-xs">PA</div>
+<div class="flex flex-col">
+<span class="text-white text-xs font-semibold">Super Admin</span>
+<span class="text-[#94a3b8] text-[10px]">EduSecure Global</span>
+</div>
+</div>
+</div>
+</aside>
+<!-- Topbar (TopNavBar Anchor) -->
+<header class="fixed top-0 right-0 left-[280px] h-[64px] bg-white border-b border-outline-variant flex justify-between items-center px-8 z-40">
+<div class="flex items-center gap-4">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="pl-10 pr-4 py-1.5 bg-surface-container-low border border-outline-variant rounded-lg text-body-main w-[320px] focus:outline-none focus:ring-2 focus:ring-primary" placeholder="Search compliance rules..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-2 px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs font-semibold">
+<span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                System Healthy
+            </div>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary">notifications</span>
+</div></header>
+<!-- Main Content Area -->
+<main class="pt-[64px] pl-[280px] pr-[400px] h-screen overflow-y-auto bg-surface-bright">
+<div class="p-8 max-w-[1200px] mx-auto space-y-8">
+<!-- Header -->
+<div class="flex justify-between items-start">
+<div>
+<h2 class="font-page-title text-page-title text-on-surface">Compliance Notification Center</h2>
+<p class="text-body-main font-body-main text-on-surface-variant mt-2">Manage automated governance rules and system-wide notifications.</p>
+</div>
+<button class="bg-primary-container text-white px-4 py-2 rounded-lg font-label-sm flex items-center gap-2 hover:bg-primary transition-colors">
+<span class="material-symbols-outlined text-[20px]">add</span>
+                Create New Rule
+            </button>
+</div>
+<!-- KPI Cards -->
+<div class="grid grid-cols-3 gap-6">
+<div class="bg-white rounded-lg p-6 shadow-sm border border-outline-variant accent-card">
+<p class="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wide">Active Rules</p>
+<div class="mt-2 flex items-baseline gap-2">
+<span class="text-[32px] font-page-title text-on-surface">142</span>
+<span class="text-xs text-green-600 font-medium">+3 this week</span>
+</div>
+</div>
+<div class="bg-white rounded-lg p-6 shadow-sm border border-outline-variant accent-card-critical">
+<p class="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wide">Triggered Today</p>
+<div class="mt-2 flex items-baseline gap-2">
+<span class="text-[32px] font-page-title text-on-surface">28</span>
+<span class="text-xs text-error font-medium">12 high severity</span>
+</div>
+</div>
+<div class="bg-white rounded-lg p-6 shadow-sm border border-outline-variant accent-card-medium">
+<p class="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wide">Pending Review</p>
+<div class="mt-2 flex items-baseline gap-2">
+<span class="text-[32px] font-page-title text-on-surface">7</span>
+<span class="text-xs text-on-surface-variant font-medium">Require action</span>
+</div>
+</div>
+</div>
+<!-- Table -->
+<div class="bg-white rounded-lg shadow-sm border border-outline-variant overflow-hidden">
+<div class="p-6 border-b border-outline-variant flex justify-between items-center">
+<h3 class="font-section-title text-section-title text-on-surface">Compliance Rules</h3>
+<div class="flex gap-2">
+<button class="p-2 text-on-surface-variant hover:bg-surface-container rounded-lg transition-colors"><span class="material-symbols-outlined text-[20px]">filter_list</span></button>
+<button class="p-2 text-on-surface-variant hover:bg-surface-container rounded-lg transition-colors"><span class="material-symbols-outlined text-[20px]">more_vert</span></button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-outline-variant bg-surface-container-lowest">
+<th class="px-6 py-4 font-table-header text-table-header text-on-surface-variant uppercase">Rule Name</th>
+<th class="px-6 py-4 font-table-header text-table-header text-on-surface-variant uppercase">Category</th>
+<th class="px-6 py-4 font-table-header text-table-header text-on-surface-variant uppercase">Trigger Type</th>
+<th class="px-6 py-4 font-table-header text-table-header text-on-surface-variant uppercase">Last Triggered</th>
+<th class="px-6 py-4 font-table-header text-table-header text-on-surface-variant uppercase">Status</th>
+<th class="px-6 py-4 font-table-header text-table-header text-on-surface-variant uppercase text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="font-table-cell text-table-cell text-on-surface">
+<tr class="border-b border-outline-variant hover:bg-surface-container-low transition-colors h-[64px] bg-surface-container-low cursor-pointer">
+<td class="px-6 py-2 font-medium">Data Breach Protocol - Student PII</td>
+<td class="px-6 py-2">
+<span class="inline-flex items-center px-2 py-1 rounded-md bg-error-container text-error text-xs font-medium">Security</span>
+</td>
+<td class="px-6 py-2 text-on-surface-variant">System Alert</td>
+<td class="px-6 py-2 text-on-surface-variant">10 mins ago</td>
+<td class="px-6 py-2">
+<span class="inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-green-500"></span> Active</span>
+</td>
+<td class="px-6 py-2 text-right">
+<button class="text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined text-[20px]">edit</span></button>
+</td>
+</tr>
+<tr class="border-b border-outline-variant hover:bg-surface-container-low transition-colors h-[64px]">
+<td class="px-6 py-2 font-medium">Unusual Login Location</td>
+<td class="px-6 py-2">
+<span class="inline-flex items-center px-2 py-1 rounded-md bg-secondary-container text-on-secondary-container text-xs font-medium">Access Control</span>
+</td>
+<td class="px-6 py-2 text-on-surface-variant">Anomaly Detect</td>
+<td class="px-6 py-2 text-on-surface-variant">2 hrs ago</td>
+<td class="px-6 py-2">
+<span class="inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-green-500"></span> Active</span>
+</td>
+<td class="px-6 py-2 text-right">
+<button class="text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined text-[20px]">edit</span></button>
+</td>
+</tr>
+<tr class="border-b border-outline-variant hover:bg-surface-container-low transition-colors h-[64px]">
+<td class="px-6 py-2 font-medium">Failed Compliance Audit Alert</td>
+<td class="px-6 py-2">
+<span class="inline-flex items-center px-2 py-1 rounded-md bg-tertiary-fixed text-on-tertiary-fixed text-xs font-medium">Audit</span>
+</td>
+<td class="px-6 py-2 text-on-surface-variant">Scheduled Scan</td>
+<td class="px-6 py-2 text-on-surface-variant">Yesterday</td>
+<td class="px-6 py-2">
+<span class="inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-outline"></span> Paused</span>
+</td>
+<td class="px-6 py-2 text-right">
+<button class="text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined text-[20px]">edit</span></button>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low transition-colors h-[64px]">
+<td class="px-6 py-2 font-medium">Inactive Admin Account Revocation</td>
+<td class="px-6 py-2">
+<span class="inline-flex items-center px-2 py-1 rounded-md bg-secondary-container text-on-secondary-container text-xs font-medium">Access Control</span>
+</td>
+<td class="px-6 py-2 text-on-surface-variant">Time-based</td>
+<td class="px-6 py-2 text-on-surface-variant">3 days ago</td>
+<td class="px-6 py-2">
+<span class="inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-green-500"></span> Active</span>
+</td>
+<td class="px-6 py-2 text-right">
+<button class="text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined text-[20px]">edit</span></button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div><div class="bg-white rounded-lg shadow-sm border border-outline-variant p-6 space-y-6 max-h-[300px] overflow-y-auto">
+<h3 class="font-section-title text-section-title text-on-surface">Notification Timeline</h3>
+<div class="relative pl-8 space-y-6">
+<div class="absolute left-[11px] top-2 bottom-2 w-0.5 bg-outline-variant"></div>
+<div class="relative">
+<div class="absolute -left-[25px] top-1 w-3 h-3 rounded-full bg-error border-2 border-white"></div>
+<div class="flex justify-between items-start">
+<div>
+<p class="text-sm font-medium text-on-surface">Rule triggered</p>
+<p class="text-xs text-on-surface-variant">Data Breach Protocol - Student PII</p>
+</div>
+<span class="text-xs text-on-surface-variant">10 mins ago</span>
+</div>
+</div>
+<div class="relative">
+<div class="absolute -left-[25px] top-1 w-3 h-3 rounded-full bg-primary border-2 border-white"></div>
+<div class="flex justify-between items-start">
+<div>
+<p class="text-sm font-medium text-on-surface">Reminder issued</p>
+<p class="text-xs text-on-surface-variant">Automated notification sent to admin</p>
+</div>
+<span class="text-xs text-on-surface-variant">5 mins ago</span>
+</div>
+</div>
+<div class="relative">
+<div class="absolute -left-[25px] top-1 w-3 h-3 rounded-full bg-secondary border-2 border-white"></div>
+<div class="flex justify-between items-start">
+<div>
+<p class="text-sm font-medium text-on-surface">Escalation queued</p>
+<p class="text-xs text-on-surface-variant">Pending security team review</p>
+</div>
+<span class="text-xs text-on-surface-variant">2 mins ago</span>
+</div>
+</div>
+<div class="relative">
+<div class="absolute -left-[25px] top-1 w-3 h-3 rounded-full bg-green-500 border-2 border-white"></div>
+<div class="flex justify-between items-start">
+<div>
+<p class="text-sm font-medium text-on-surface">Resolution logged</p>
+<p class="text-xs text-on-surface-variant">Incident marked as resolved</p>
+</div>
+<span class="text-xs text-on-surface-variant">Just now</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Right Drawer -->
+<aside class="w-[400px] h-[calc(100vh-64px)] fixed right-0 top-[64px] bg-white border-l border-outline-variant overflow-y-auto z-30 shadow-[-4px_0_24px_rgba(0,0,0,0.05)] custom-scrollbar">
+<div class="p-6 border-b border-outline-variant flex justify-between items-center sticky top-0 bg-white z-10">
+<h3 class="font-section-title text-section-title text-on-surface">Rule Details</h3>
+<button class="text-on-surface-variant hover:bg-surface-container rounded-full p-1 transition-colors"><span class="material-symbols-outlined">close</span></button>
+</div>
+<div class="p-6 space-y-8">
+<!-- Details section -->
+<div>
+<div class="flex items-center gap-2 mb-4">
+<span class="px-2 py-1 rounded-md bg-error-container text-error text-xs font-medium">Security</span>
+<span class="inline-flex items-center gap-1.5 text-sm"><span class="w-2 h-2 rounded-full bg-green-500"></span> Active</span>
+</div>
+<h4 class="text-xl font-bold text-on-surface mb-2">Data Breach Protocol - Student PII</h4>
+<p class="text-body-main text-on-surface-variant">Monitors for anomalous bulk downloads or unauthorized access attempts to student personally identifiable information.</p>
+</div>
+<div class="space-y-4">
+<h5 class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wide">Trigger Conditions</h5>
+<div class="bg-surface-container-low rounded-lg p-4 border border-outline-variant">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-error mt-0.5">warning</span>
+<div>
+<p class="font-medium text-on-surface text-sm">Downloads &gt; 500 records</p>
+<p class="text-xs text-on-surface-variant mt-1">Within a 10 minute window by a single user account.</p>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-low rounded-lg p-4 border border-outline-variant">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-primary mt-0.5">location_off</span>
+<div>
+<p class="font-medium text-on-surface text-sm">Access from unapproved IPs</p>
+<p class="text-xs text-on-surface-variant mt-1">Any access outside the pre-approved geographical bounds.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="space-y-4">
+<h5 class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wide">Rule Dependency Graph</h5>
+<div class="h-[100px] flex items-center justify-between px-2 relative">
+<div class="absolute top-1/2 left-0 w-full h-px bg-outline-variant -z-10"></div>
+<div class="flex flex-col items-center gap-1">
+<span class="px-3 py-1 rounded-full bg-primary text-white text-[10px] font-bold uppercase">Trigger</span>
+<span class="text-[10px] text-primary font-medium">Active</span>
+</div>
+<div class="flex flex-col items-center gap-1">
+<span class="px-3 py-1 rounded-full border border-dashed border-outline text-on-surface-variant text-[10px] font-bold uppercase bg-white">Reminder</span>
+<span class="text-[10px] text-on-surface-variant">Pending</span>
+</div>
+<div class="flex flex-col items-center gap-1">
+<span class="px-3 py-1 rounded-full bg-secondary-container text-on-secondary-container text-[10px] font-bold uppercase">Escalation</span>
+<span class="text-[10px] text-on-secondary-container">Conditional</span>
+</div>
+<div class="flex flex-col items-center gap-1">
+<span class="px-3 py-1 rounded-full bg-green-500 text-white text-[10px] font-bold uppercase">Closure</span>
+<span class="text-[10px] text-green-600 font-medium">Final</span>
+</div>
+</div>
+</div><div class="space-y-4">
+<h5 class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wide">Automated Actions</h5>
+<div class="bg-white rounded-lg p-4 border border-outline-variant flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant">block</span>
+<span class="text-sm font-medium text-on-surface">Suspend User Account</span>
+</div>
+<div class="bg-white rounded-lg p-4 border border-outline-variant flex items-center gap-3">
+<span class="material-symbols-outlined text-on-surface-variant">mail</span>
+<span class="text-sm font-medium text-on-surface">Email Security Team</span>
+</div>
+</div>
+<div class="pt-4 border-t border-outline-variant flex gap-3">
+<button class="flex-1 bg-white border border-outline-variant text-on-surface px-4 py-2 rounded-lg font-label-sm hover:bg-surface-container-low transition-colors">Edit Rule</button>
+<button class="flex-1 bg-error text-white px-4 py-2 rounded-lg font-label-sm hover:bg-error/90 transition-colors">Pause Rule</button>
+</div>
+</div>
+</aside>
+</body></html>

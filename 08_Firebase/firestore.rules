@@ -19,7 +19,7 @@ service cloud.firestore {
     }
 
     function userRole() {
-      return (request.auth != null && request.auth.token != null && 'role' in request.auth.token) ? request.auth.token.role : 'super_admin';
+      return (request.auth != null && request.auth.token != null && 'role' in request.auth.token) ? request.auth.token.role : 'unknown';
     }
 
     // Role checks
@@ -27,11 +27,16 @@ service cloud.firestore {
     function isSchoolAdmin() { return userRole() == 'school_admin'; }
     function isPrincipal() { return userRole() == 'principal'; }
     function isTeacher() { return userRole() == 'teacher'; }
+    function isStudent() { return userRole() == 'student'; }
+    function isParent() { return userRole() == 'parent'; }
+
+    // User checks
+    function isSelf(userId) { return isAuthenticated() && request.auth.uid == userId; }
 
     // Tenant boundary checks
     // Super admins bypass tenant boundaries
     function isTenantUser(targetSchoolId) {
-      return true; // Bypassed for emulator testing
+      return isAuthenticated() && (schoolId() == targetSchoolId || isSuperAdmin());
     }
 
     // ==========================================
@@ -65,7 +70,8 @@ service cloud.firestore {
 
     // Validate creation schema
     function isValidCreationSchema(targetSchoolId) {
-      return true;
+      return request.resource.data.schoolId == targetSchoolId &&
+             (!('createdAt' in request.resource.data) || request.resource.data.createdAt == request.time);
     }
 
     // Validate update schema
@@ -81,10 +87,26 @@ service cloud.firestore {
       
       allow read: if isTenantUser(targetSchoolId);
       allow create: if isSuperAdmin();
-      allow update: if isTenantUser(targetSchoolId) && (isSchoolAdmin() || isPrincipal() || isSuperAdmin())
+      allow update: if isTenantUser(targetSchoolId) && (isSchoolAdmin() || isSuperAdmin())
                     && protectedImmutableFields()
                     && protectedServerFields();
       allow delete: if false;
+
+      // Users Collection
+      match /users/{userId} {
+        allow read: if isTenantUser(targetSchoolId) && (request.auth.uid == userId || isTeacher() || isPrincipal() || isSchoolAdmin() || isSuperAdmin());
+        allow create: if isTenantUser(targetSchoolId) && (isPrincipal() || isSchoolAdmin() || isSuperAdmin()) && isValidCreationSchema(targetSchoolId);
+        allow update: if isTenantUser(targetSchoolId) && (isPrincipal() || isSchoolAdmin() || isSuperAdmin()) && isValidUpdateSchema();
+        allow delete: if isSuperAdmin();
+      }
+
+      // Roles Collection
+      match /roles/{roleId} {
+        allow read: if isTenantUser(targetSchoolId) && (isPrincipal() || isSchoolAdmin() || isSuperAdmin());
+        allow create: if isSuperAdmin();
+        allow update: if isTenantUser(targetSchoolId) && (isSchoolAdmin() || isSuperAdmin()) && isValidUpdateSchema();
+        allow delete: if isSuperAdmin();
+      }
 
       // Students Collection
       match /students/{studentId} {
@@ -125,25 +147,103 @@ service cloud.firestore {
         allow delete: if isSuperAdmin();
       }
 
+      // Categories (using legacy 'categorys' path pending migration)
+      match /categorys/{categoryId} {
+        allow read: if isTenantUser(targetSchoolId);
+        allow create: if isTenantUser(targetSchoolId) && (isPrincipal() || isSchoolAdmin() || isSuperAdmin()) && isValidCreationSchema(targetSchoolId);
+        allow update: if isTenantUser(targetSchoolId) && (isPrincipal() || isSchoolAdmin() || isSuperAdmin()) && isValidUpdateSchema();
+        allow delete: if isSuperAdmin();
+      }
+
+      // Deliveries (using legacy 'deliverys' path pending migration)
+      match /deliverys/{deliveryId} {
+        allow read: if isTenantUser(targetSchoolId);
+        allow create: if isTenantUser(targetSchoolId) && (isPrincipal() || isSchoolAdmin() || isSuperAdmin()) && isValidCreationSchema(targetSchoolId);
+        allow update: if isTenantUser(targetSchoolId) && (isPrincipal() || isSchoolAdmin() || isSuperAdmin()) && isValidUpdateSchema();
+        allow delete: if isSuperAdmin();
+      }
+
+      // Announcements
+      match /announcements/{announcementId} {
+        allow read: if isTenantUser(targetSchoolId);
+        allow create: if isTenantUser(targetSchoolId) && (isTeacher() || isPrincipal() || isSchoolAdmin() || isSuperAdmin()) && isValidCreationSchema(targetSchoolId);
+        allow update: if isTenantUser(targetSchoolId) && (isTeacher() || isPrincipal() || isSchoolAdmin() || isSuperAdmin()) && isValidUpdateSchema();
+        allow delete: if isSuperAdmin();
+      }
+
+      // Schedulings
+      match /schedulings/{documentId} {
+        allow read: if isTenantUser(targetSchoolId);
+        allow create: if isTenantUser(targetSchoolId) && (isPrincipal() || isSchoolAdmin() || isSuperAdmin()) && isValidCreationSchema(targetSchoolId);
+        allow update: if isTenantUser(targetSchoolId) && (isPrincipal() || isSchoolAdmin() || isSuperAdmin()) && isValidUpdateSchema();
+        allow delete: if isSuperAdmin();
+      }
+
+      // Broadcasts
+      match /broadcasts/{documentId} {
+        allow read: if isTenantUser(targetSchoolId);
+        allow create: if isTenantUser(targetSchoolId) && (isPrincipal() || isSchoolAdmin() || isSuperAdmin()) && isValidCreationSchema(targetSchoolId);
+        allow update: if isTenantUser(targetSchoolId) && (isPrincipal() || isSchoolAdmin() || isSuperAdmin()) && isValidUpdateSchema();
+        allow delete: if isSuperAdmin();
+      }
+
+      // WhatsApp Templates
+      match /whatsapptemplates/{documentId} {
+        allow read: if isTenantUser(targetSchoolId);
+        allow create: if isTenantUser(targetSchoolId) && (isPrincipal() || isSchoolAdmin() || isSuperAdmin()) && isValidCreationSchema(targetSchoolId);
+        allow update: if isTenantUser(targetSchoolId) && (isPrincipal() || isSchoolAdmin() || isSuperAdmin()) && isValidUpdateSchema();
+        allow delete: if isSuperAdmin();
+      }
+
+      // Communication Groups
+      match /communicationgroups/{documentId} {
+        allow read: if isTenantUser(targetSchoolId);
+        allow create: if isTenantUser(targetSchoolId) && (isPrincipal() || isSchoolAdmin() || isSuperAdmin()) && isValidCreationSchema(targetSchoolId);
+        allow update: if isTenantUser(targetSchoolId) && (isPrincipal() || isSchoolAdmin() || isSuperAdmin()) && isValidUpdateSchema();
+        allow delete: if isSuperAdmin();
+      }
+
+      // Templates
+      match /templates/{documentId} {
+        allow read: if isTenantUser(targetSchoolId);
+        allow create: if isTenantUser(targetSchoolId) && (isPrincipal() || isSchoolAdmin() || isSuperAdmin()) && isValidCreationSchema(targetSchoolId);
+        allow update: if isTenantUser(targetSchoolId) && (isPrincipal() || isSchoolAdmin() || isSuperAdmin()) && isValidUpdateSchema();
+        allow delete: if isSuperAdmin();
+      }
+
+      // Preferences
+      match /preferences/{userId} {
+        allow read: if isTenantUser(targetSchoolId) && (isSelf(userId) || isSuperAdmin());
+        allow create: if isTenantUser(targetSchoolId) && (isSelf(userId) || isSuperAdmin()) && isValidCreationSchema(targetSchoolId);
+        allow update: if isTenantUser(targetSchoolId) && (isSelf(userId) || isSuperAdmin()) && isValidUpdateSchema();
+        allow delete: if isSuperAdmin();
+      }
+
       
       // Leaderboards
       match /leaderboards/{document=**} {
-        allow read, write: if isTenantUser(targetSchoolId);
+        allow read: if isTenantUser(targetSchoolId);
+        allow write: if isSuperAdmin();
       }
       
       // Analytics
       match /analytics/{document=**} {
-        allow read, write: if isTenantUser(targetSchoolId);
+        allow read: if isTenantUser(targetSchoolId) && (isPrincipal() || isSchoolAdmin() || isSuperAdmin());
+        allow write: if isSuperAdmin();
       }
       
       // Dashboard Metrics (KPI)
       match /dashboard_metrics/{document=**} {
-        allow read, write: if isTenantUser(targetSchoolId);
+        allow read: if isTenantUser(targetSchoolId) && (isPrincipal() || isSchoolAdmin() || isSuperAdmin());
+        allow write: if isSuperAdmin();
       }
       
       // Notifications
-      match /notifications/{document=**} {
-        allow read, write: if isTenantUser(targetSchoolId);
+      match /notifications/{notificationId} {
+        allow read: if isTenantUser(targetSchoolId) && (isSuperAdmin() || !('userId' in resource.data) || resource.data.userId == request.auth.uid);
+        allow create: if isTenantUser(targetSchoolId) && (isTeacher() || isPrincipal() || isSchoolAdmin() || isSuperAdmin()) && isValidCreationSchema(targetSchoolId);
+        allow update: if isTenantUser(targetSchoolId) && (isSuperAdmin() || resource.data.userId == request.auth.uid || (!('userId' in resource.data) && (isPrincipal() || isSchoolAdmin()))) && isValidUpdateSchema();
+        allow delete: if isSuperAdmin();
       }
 
       // Fallback for unhandled subcollections (Default Deny)
